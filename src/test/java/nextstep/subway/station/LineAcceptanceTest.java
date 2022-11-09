@@ -71,7 +71,29 @@ public class LineAcceptanceTest {
         // then
         assertThat(lineNames).contains(expectLine1, expectLine2);
     }
-    
+
+    /**
+     * Given 지하철 노선을 생성하고
+     * When 생성한 지하철 노선을 조회하면
+     * Then 생성한 지하철 노선의 정보를 응답받을 수 있다.
+     */
+    @DisplayName("지하철 노선을 조회한다.")
+    @Test
+    void showLine() {
+        // given
+        String expectLine = "3호선";
+        Long lineId = createLine(expectLine)
+                .jsonPath().getLong("id");
+
+        // when
+        String result = readLine(lineId)
+                .jsonPath().getString("name");
+
+        // then
+        assertThat(result).isEqualTo(expectLine);
+    }
+
+
     private ExtractableResponse<Response> createLine(String name) {
         Map<String, String> params = new HashMap<>();
         params.put("name", name);
@@ -87,6 +109,13 @@ public class LineAcceptanceTest {
     private ExtractableResponse<Response> readLines() {
         return RestAssured.given().log().all()
                 .when().get("/lines")
+                .then().log().all()
+                .extract();
+    }
+
+    private ExtractableResponse<Response> readLine(Long id) {
+        return RestAssured.given().log().all()
+                .when().get("/lines/" + id)
                 .then().log().all()
                 .extract();
     }

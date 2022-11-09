@@ -7,6 +7,7 @@ import nextstep.subway.dto.LineResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,6 +32,11 @@ public class LineService {
         return lines.stream()
                 .map(LineResponse::of)
                 .collect(Collectors.toList());
+    }
+
+    public LineResponse findLine(Long id) {
+        Line line = lineRepository.findById(id).orElseThrow(NoResultException::new);
+        return LineResponse.of(line);
     }
 
     @Transactional
