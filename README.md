@@ -118,7 +118,7 @@ Then 해당 지하철 노선 정보는 삭제된다
 - [x] Line 도메인 생성
 - [x] Line Repository 생성
 - [x] Line Service 생성
-- [ ] Line Controller 생성
+- [x] Line Controller 생성
 - [ ] 지하철 노선 생성 인수 테스트 작성
 - [ ] 지하철 노선 생성 기능 구현
 - [ ] 지하철 노선 목록 조회 인수 테스트 작성
