@@ -36,10 +36,10 @@ public class LineAcceptanceTest {
      */
     @DisplayName("지하철 노선을 생성한다.")
     @Test
-    void createStation() {
+    void createLine() {
         // when
         String expectLine = "3호선";
-        ExtractableResponse<Response> response = createLine(expectLine);
+        ExtractableResponse<Response> response = createLine(expectLine, "주황색");
 
         // then
         assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED.value());
@@ -61,8 +61,8 @@ public class LineAcceptanceTest {
         // given
         String expectLine1 = "3호선";
         String expectLine2 = "분당선";
-        createLine(expectLine1);
-        createLine(expectLine2);
+        createLine(expectLine1, "주황색");
+        createLine(expectLine2, "노랑색");
 
         // when
         List<String> lineNames = readLines()
@@ -82,7 +82,7 @@ public class LineAcceptanceTest {
     void showLine() {
         // given
         String expectLine = "3호선";
-        Long lineId = createLine(expectLine)
+        Long lineId = createLine(expectLine, "주황색")
                 .jsonPath().getLong("id");
 
         // when
@@ -93,15 +93,50 @@ public class LineAcceptanceTest {
         assertThat(result).isEqualTo(expectLine);
     }
 
+    /**
+     * Given 지하철 노선을 생성하고
+     * When 생성한 지하철 노선을 수정하면
+     * Then 해당 지하철 노선 정보는 수정된다.
+     */
+    @DisplayName("지하철 노선을 수정한다.")
+    @Test
+    void updateLine() {
+        // given
+        String expectLineName = "2호선";
+        Long lineId = createLine("3호선", "주황색")
+                .jsonPath().getLong("id");
 
-    private ExtractableResponse<Response> createLine(String name) {
+        // when
+        String result = updateLine(lineId, expectLineName, "주황색")
+                .jsonPath().getString("name");
+
+        // then
+        assertThat(result).isEqualTo(expectLineName);
+    }
+
+
+    private ExtractableResponse<Response> createLine(String name, String color) {
         Map<String, String> params = new HashMap<>();
         params.put("name", name);
+        params.put("color", color);
 
         return RestAssured.given().log().all()
                 .body(params)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/lines")
+                .then().log().all()
+                .extract();
+    }
+
+    private ExtractableResponse<Response> updateLine(Long id, String name, String color) {
+        Map<String, String> params = new HashMap<>();
+        params.put("name", name);
+        params.put("color", color);
+
+        return RestAssured.given().log().all()
+                .body(params)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .when().patch("/lines/" + id)
                 .then().log().all()
                 .extract();
     }

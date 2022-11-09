@@ -26,6 +26,15 @@ public class LineService {
         return LineResponse.of(persistLine);
     }
 
+    @Transactional
+    public LineResponse updateLine(Long id, LineRequest lineRequest) {
+        Line line = findLineById(id);
+        line.update(lineRequest.getName(), lineRequest.getColor());
+        Line persistLine = lineRepository.save(line);
+
+        return LineResponse.of(persistLine);
+    }
+
     public List<LineResponse> findAllLines() {
         List<Line> lines = lineRepository.findAll();
 
@@ -35,8 +44,11 @@ public class LineService {
     }
 
     public LineResponse findLine(Long id) {
-        Line line = lineRepository.findById(id).orElseThrow(NoResultException::new);
-        return LineResponse.of(line);
+        return LineResponse.of(findLineById(id));
+    }
+
+    private Line findLineById(Long id) {
+        return lineRepository.findById(id).orElseThrow(NoResultException::new);
     }
 
     @Transactional
