@@ -114,6 +114,27 @@ public class LineAcceptanceTest {
         assertThat(result).isEqualTo(expectLineName);
     }
 
+    /**
+     * Given 지하철 노선을 생성하고
+     * When 생성한 지하철 노선을 삭제하면
+     * Then 해당 지하철 노선 정보는 삭제된다.
+     */
+    @DisplayName("지하철 노선을 삭제한다.")
+    @Test
+    void deleteLine() {
+        // given
+        Long lineId = createLine("3호선", "주황색")
+                .jsonPath().getLong("id");
+
+        // when
+        deleteLine(lineId);
+
+        // then
+        List<String> lineIds = readLines()
+                .jsonPath().getList("id", String.class);
+        assertThat(lineIds).isEmpty();
+    }
+
 
     private ExtractableResponse<Response> createLine(String name, String color) {
         Map<String, String> params = new HashMap<>();
@@ -137,6 +158,13 @@ public class LineAcceptanceTest {
                 .body(params)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when().patch("/lines/" + id)
+                .then().log().all()
+                .extract();
+    }
+
+    private ExtractableResponse<Response> deleteLine(Long id) {
+        return RestAssured.given().log().all()
+                .when().delete("/lines/" + id)
                 .then().log().all()
                 .extract();
     }
