@@ -7,6 +7,7 @@ import nextstep.subway.dto.StationResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,6 +32,10 @@ public class StationService {
         return stations.stream()
                 .map(station -> StationResponse.of(station))
                 .collect(Collectors.toList());
+    }
+
+    public Station findStation(Long id) {
+        return stationRepository.findById(id).orElseThrow(NoResultException::new);
     }
 
     @Transactional

@@ -4,6 +4,8 @@ import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import nextstep.subway.DatabaseCleanup;
+import nextstep.subway.dto.StationResponse;
+import nextstep.subway.station.StationAcceptanceTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,7 +48,13 @@ public class LineAcceptanceTest {
     void createLine() {
         // when
         String expectLine = "3호선";
-        ExtractableResponse<Response> response = createLine(expectLine, "주황색");
+        Long upStationId = StationAcceptanceTest.createStation("연신내역")
+                .jsonPath().getLong("id");
+        Long downStationId = StationAcceptanceTest.createStation("불광역")
+                .jsonPath().getLong("id");
+
+        ExtractableResponse<Response> response =
+                createLine(expectLine, "주황색", upStationId, downStationId, 10);
 
         // then
         assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED.value());
@@ -68,8 +76,14 @@ public class LineAcceptanceTest {
         // given
         String expectLine1 = "3호선";
         String expectLine2 = "분당선";
-        createLine(expectLine1, "주황색");
-        createLine(expectLine2, "노랑색");
+
+        Long upStationId = StationAcceptanceTest.createStation("연신내역")
+                .jsonPath().getLong("id");
+        Long downStationId = StationAcceptanceTest.createStation("불광역")
+                .jsonPath().getLong("id");
+
+        createLine(expectLine1, "주황색", upStationId, downStationId, 10);
+        createLine(expectLine2, "노랑색", upStationId, downStationId, 10);
 
         // when
         List<String> lineNames = readLines()
@@ -89,7 +103,12 @@ public class LineAcceptanceTest {
     void showLine() {
         // given
         String expectLine = "3호선";
-        Long lineId = createLine(expectLine, "주황색")
+        Long upStationId = StationAcceptanceTest.createStation("연신내역")
+                .jsonPath().getLong("id");
+        Long downStationId = StationAcceptanceTest.createStation("불광역")
+                .jsonPath().getLong("id");
+
+        Long lineId = createLine(expectLine, "주황색", upStationId, downStationId, 10)
                 .jsonPath().getLong("id");
 
         // when
@@ -102,6 +121,34 @@ public class LineAcceptanceTest {
 
     /**
      * Given 지하철 노선을 생성하고
+     * When 생성한 지하철 노선을 조회하면
+     * Then 노선에 포함된 역 정보를 응답받을 수 있다.
+     */
+    @DisplayName("지하철 노선을 조회하면, 노선에 포함된 지하철 역도 조회된다.")
+    @Test
+    void showStations() {
+        // given
+        String stationName1 = "연신내역";
+        String stationName2 = "불광역";
+
+        Long upStationId = StationAcceptanceTest.createStation("연신내역")
+                .jsonPath().getLong("id");
+        Long downStationId = StationAcceptanceTest.createStation("불광역")
+                .jsonPath().getLong("id");
+
+        Long lineId = createLine("3호선", "주황색", upStationId, downStationId, 10)
+                .jsonPath().getLong("id");
+
+        // when
+        List<String> stationNames = readLine(lineId)
+                .jsonPath().getList("stations.name", String.class);
+
+        // then
+        assertThat(stationNames).contains(stationName1, stationName2);
+    }
+
+    /**
+     * Given 지하철 노선을 생성하고
      * When 생성한 지하철 노선을 수정하면
      * Then 해당 지하철 노선 정보는 수정된다.
      */
@@ -110,7 +157,12 @@ public class LineAcceptanceTest {
     void updateLine() {
         // given
         String expectLineName = "2호선";
-        Long lineId = createLine("3호선", "주황색")
+        Long upStationId = StationAcceptanceTest.createStation("연신내역")
+                .jsonPath().getLong("id");
+        Long downStationId = StationAcceptanceTest.createStation("불광역")
+                .jsonPath().getLong("id");
+
+        Long lineId = createLine("3호선", "주황색", upStationId, downStationId, 10)
                 .jsonPath().getLong("id");
 
         // when
@@ -130,7 +182,11 @@ public class LineAcceptanceTest {
     @Test
     void deleteLine() {
         // given
-        Long lineId = createLine("3호선", "주황색")
+        Long upStationId = StationAcceptanceTest.createStation("연신내역")
+                .jsonPath().getLong("id");
+        Long downStationId = StationAcceptanceTest.createStation("불광역")
+                .jsonPath().getLong("id");
+        Long lineId = createLine("3호선", "주황색", upStationId, downStationId, 10)
                 .jsonPath().getLong("id");
 
         // when
@@ -143,10 +199,19 @@ public class LineAcceptanceTest {
     }
 
 
-    private ExtractableResponse<Response> createLine(String name, String color) {
+    private ExtractableResponse<Response> createLine(
+            String name,
+            String color,
+            Long upStationId,
+            Long downStationId,
+            int distance
+    ) {
         Map<String, String> params = new HashMap<>();
         params.put("name", name);
         params.put("color", color);
+        params.put("upStationId", upStationId.toString());
+        params.put("downStationId", downStationId.toString());
+        params.put("distance", String.valueOf(distance));
 
         return RestAssured.given().log().all()
                 .body(params)
