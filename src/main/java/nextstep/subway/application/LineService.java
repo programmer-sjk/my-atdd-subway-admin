@@ -6,6 +6,7 @@ import nextstep.subway.domain.Station;
 import nextstep.subway.dto.LineRequest;
 import nextstep.subway.dto.LineResponse;
 import nextstep.subway.dto.LineUpdateRequest;
+import nextstep.subway.repository.StationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,29 +18,31 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class LineService {
     private final LineRepository lineRepository;
-    private final StationService stationService;
+    private final StationRepository stationRepository;
 
-    public LineService(LineRepository lineRepository, StationService stationService) {
+    public LineService(LineRepository lineRepository, StationRepository stationRepository) {
         this.lineRepository = lineRepository;
-        this.stationService = stationService;
+        this.stationRepository = stationRepository;
     }
 
     @Transactional
-    public LineResponse saveLine(LineRequest lineRequest) {
-        Station upStation = stationService.findStation(lineRequest.getUpStationId());
-        Station downStation = stationService.findStation(lineRequest.getDownStationId());
+    public LineResponse saveLine(LineRequest request) {
+        Station upStation = findStation(request.getUpStationId());
+        Station downStation = findStation(request.getDownStationId());
 
-        Line persistLine = lineRepository.save(lineRequest.toLine(upStation, downStation));
-        return LineResponse.of(persistLine);
+        Line savedLine = lineRepository.save(request.toLine(upStation, downStation));
+        return LineResponse.of(savedLine);
+    }
+
+    private Station findStation(Long id) {
+        return stationRepository.findById(id).orElseThrow(NoResultException::new);
     }
 
     @Transactional
-    public LineResponse updateLine(Long id, LineUpdateRequest request) {
+    public void updateLine(Long id, LineUpdateRequest request) {
         Line line = findLineById(id);
         line.update(request.getName(), request.getColor());
-        Line persistLine = lineRepository.save(line);
-
-        return LineResponse.of(persistLine);
+        lineRepository.save(line);
     }
 
     public List<LineResponse> findAllLines() {
