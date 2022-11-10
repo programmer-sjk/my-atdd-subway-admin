@@ -1,7 +1,7 @@
 package nextstep.subway.application;
 
 import nextstep.subway.domain.Line;
-import nextstep.subway.domain.LineRepository;
+import nextstep.subway.repository.LineRepository;
 import nextstep.subway.domain.Station;
 import nextstep.subway.dto.LineRequest;
 import nextstep.subway.dto.LineResponse;
