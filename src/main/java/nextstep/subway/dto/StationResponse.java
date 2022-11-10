@@ -2,8 +2,6 @@ package nextstep.subway.dto;
 
 import nextstep.subway.domain.Station;
 
-import java.time.LocalDateTime;
-
 public class StationResponse {
     private Long id;
     private String name;
@@ -12,7 +10,7 @@ public class StationResponse {
         return new StationResponse(station.getId(), station.getName());
     }
 
-    public StationResponse() {
+    private StationResponse() {
     }
 
     public StationResponse(Long id, String name) {
