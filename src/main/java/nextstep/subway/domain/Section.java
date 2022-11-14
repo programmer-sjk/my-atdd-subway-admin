@@ -30,6 +30,10 @@ public class Section extends BaseEntity {
 
     protected Section() {}
 
+    public Station getDownStation() {
+        return downStation;
+    }
+
     public List<Station> findStations() {
         return Arrays.asList(upStation, downStation);
     }
@@ -49,11 +53,6 @@ public class Section extends BaseEntity {
     }
 
     public boolean isEqualUpStation(Station station) {
-        System.out.println("???");
-        System.out.println(upStation.getName());
-        System.out.println(station.getName());
-        System.out.println(upStation.getId());
-        System.out.println(station.getId());
         return upStation.equals(station);
     }
 
@@ -61,14 +60,21 @@ public class Section extends BaseEntity {
         return downStation.equals(station);
     }
 
-    private void updateUpStation(Section newSection) {
+    public void updateUpStation(Section newSection) {
         upStation = newSection.downStation;
         distance = distance.subtract(newSection.distance);
     }
 
-    private void updateDownStation(Section newSection) {
+    public void updateDownStation(Section newSection) {
         downStation = newSection.upStation;
         distance = distance.subtract(newSection.distance);
+    }
+
+    public Section merge(Section nextSection) {
+        Distance newDistance = distance.add(nextSection.distance);
+        Section section = new Section(upStation, nextSection.getDownStation(), newDistance);
+        section.addLine(line);
+        return section;
     }
 
     @Override
