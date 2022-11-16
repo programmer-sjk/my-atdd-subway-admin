@@ -37,6 +37,7 @@ public class SectionTest {
 
         // when
         section.updateDownStation(newSection);
+
         // then
         assertThat(section.getDownStation()).isEqualTo(newStation);
     }

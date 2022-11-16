@@ -79,7 +79,7 @@ public class Sections {
         deleteEndSection(prevSection, nextSection);
     }
 
-    public void validateDeletion(Station station) {
+    private void validateDeletion(Station station) {
         validateNotExistStation(station);
         validateOneSection();
     }

@@ -4,13 +4,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 class LineTest {
-    @DisplayName("이름과 색깔을 수정할 수 있다")
+    @DisplayName("노선의 이름과 색깔을 수정할 수 있다")
     @Test
     void update() {
         // given
@@ -40,21 +39,5 @@ class LineTest {
 
         // then
         assertThat(stations).contains(upStation, downStation);
-    }
-
-    @DisplayName("노선에 지하철 구간을 추가할 수 있다")
-    @Test
-    void addSection() {
-        // given
-        Line line = new Line("신분당선", "빨강색");
-        Station upStation = new Station("판교역");
-        Station downStation = new Station("강남역");
-        Section section = new Section(upStation, downStation, new Distance(10));
-
-        // when
-        line.addSection(section);
-
-        // then
-        assertThat(line.getStations()).contains(upStation, downStation);
     }
 }
